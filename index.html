@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Manager</title>
+</head>
+<body>
+    <h1>Task List</h1>
+    <ul id="task-list"></ul>
+    <input type="text" id="new-task" placeholder="New task">
+    <button onclick="addTask()">Add Task</button>
+
+    <script>
+        async function fetchTasks() {
+            try {
+                let response = await fetch('http://localhost:8000/api/tasks/');
+                let tasks = await response.json();
+                let taskList = document.getElementById('task-list');
+                taskList.innerHTML = '';
+                tasks.forEach(task => {
+                    let li = document.createElement('li');
+                    li.textContent = task.title;
+                    taskList.appendChild(li);
+                });
+            } catch (error) {
+                console.error('Error fetching tasks:', error);
+            }
+        }
+
+        async function addTask() {
+            let newTaskInput = document.getElementById('new-task');
+            let title = newTaskInput.value;
+            if (title) {
+                try {
+                    let response = await fetch('http://localhost:8000/api/tasks/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ title: title, completed: false })
+                    });
+                    let newTask = await response.json();
+                    let taskList = document.getElementById('task-list');
+                    let li = document.createElement('li');
+                    li.textContent = newTask.title;
+                    taskList.appendChild(li);
+                    newTaskInput.value = '';
+                } catch (error) {
+                    console.error('Error adding task:', error);
+                }
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', fetchTasks);
+    </script>
+</body>
+</html>
